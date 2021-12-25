@@ -1,3 +1,6 @@
+#connection information we might prefer not to share
+.cfginet
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
