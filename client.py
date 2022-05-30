@@ -2,14 +2,15 @@
 """Script for TkinterGUI chat client."""
 
 from socket import AF_INET, socket ,SOCK_STREAM
-from threading import Thread
+from _thread import *
 import tkinter
+from network import Network
 
-def receive():
+def receive(n,conn):
         """Handles receiving of messages."""
         while True:
             try:
-                msg = client_socket.recv(BUFSIZ).decode("utf8")
+                msg = n.receive(conn)
                 msg_list.insert(tkinter.END,msg)
             except OSError: #OSError. Possibly client has left the chat.
                 break
@@ -17,9 +18,9 @@ def receive():
 def send(event=None): #event is passed by binders.
     msg = my_msg.get()
     my_msg.set("") # Clears input field.
-    client_socket.send(bytes(msg, "utf8"))
+    N.send(conn,msg)
     if msg == "{quit}":
-        client_socket.close()
+        conn.close()
         top.quit()
 
 def on_closing(event=None):
@@ -27,9 +28,10 @@ def on_closing(event=None):
     my_msg.set("{quit}")
     send()
 
-top = tkinter.tk()
-top.title("Chatter")
 
+
+top = tkinter.Tk()
+top.title("Chatter")
 messages_frame = tkinter.Frame(top)
 my_msg = tkinter.StringVar()
 my_msg.set("Type your messages here.")
@@ -48,19 +50,11 @@ send_button.pack()
 
 top.protocol("WM_DELETE_WINDOW", on_closing)
 
-HOST = input('Enter host: ')
-PORT = input('Enter port: ')
+N = Network()
+conn = N.connect()
 
-if not PORT:
-    PORT = 33000 # Default value.
-else:
-    PORT = int(PORT)
+def main():
+    start_new_thread(receive,(N,conn))
+    tkinter.mainloop()
 
-BUFSIZ = 1024
-ADDR = (HOST, PORT)
-client_socket = socket(AF_INET, SOCK_STREAM)
-client_socket.connect(ADDR)
-
-receive_thread = Thread(target=receive)
-receive_thread.start()
-tkinter.mainloop()
+main()    
