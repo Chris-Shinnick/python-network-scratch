@@ -1,14 +1,23 @@
 import socket
 import pickle
+import os
+import configparser
 
 
 
 class Network:
     BUFSIZE = 2048
+    print(os.getcwd())
+    config = configparser.ConfigParser()
+    candidates = ['settings.txt']
+    found = config.read(candidates)
+
+    for key in config['settings']:
+        print(key)
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "192.168.1.187"
-        self.port = 5555
+        self.server = self.config['settings']['host']
+        self.port = int(self.config['settings']['port'])
         self.server_addr = (self.server, self.port)
         
     def bind_server(self):
